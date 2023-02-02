@@ -6,3 +6,9 @@
 # @Last modified time: 2023-02-01T20:03:33-08:00
 
 # EOF
+
+import Agent 
+
+class RLAgent(Agent):
+    def __init__(self) -> None:
+        super().__init__()
