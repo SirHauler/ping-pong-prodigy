@@ -6,3 +6,9 @@
 # @Last modified time: 2023-02-01T20:03:37-08:00
 
 # EOF
+
+import Agent
+class AIAgent(Agent):
+    def __init__(self) -> None:
+        super().__init__()
+        
