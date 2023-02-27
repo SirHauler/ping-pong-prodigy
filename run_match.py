@@ -11,6 +11,8 @@ from _accessories.game_utils import inBounds
 # Initialize the table
 Game_Table = Table()
 
+# TODO: make parameter constructions global variables
+
 # Initialize the two agents
 Game_AIAgent = AIAgent(position = {"lateral": Game_Table.default_lateral(for_player="AI"),
                                    "vertical": Game_Table.default_vertical(for_player="AI"),
@@ -68,11 +70,11 @@ while(continue_playing := True):
     # `performAction` updates the guts of `Game_Ball` and assigns it a new velocity if player hits.
     # Assumption: an agent can only perform a single action at a time step. AKA, agent CANNOT re-adjust and hit ball at the same time.
 
-    DEBUG_preActionVel, DEBUG_preActionPos = Game_Ball._velocity, NextMover.position
-    nextMover_action = NextMover.performAction(Game_Ball, hit_time=hit_time, current_time=time_step)
+    DEBUG_preActionVel, DEBUG_preActionPos = Game_Ball._velocity, NextMover._position
+    nextMover_action = NextMover.performAction(Game_Ball)
     assert nextMover_action in ("no-perception", "re-adjusted", "hit")
     assert DEBUG_preActionVel != Game_Ball._velocity if nextMover_action == "hit" else DEBUG_preActionVel == Game_Ball._velocity
-    assert DEBUG_preActionPos != NextMover.position if nextMover_action == "re-adjusted" else DEBUG_preActionPos == NextMover.position
+    assert DEBUG_preActionPos != NextMover._position if nextMover_action == "re-adjusted" else DEBUG_preActionPos == NextMover._position
 
     # NOTE: We make an assumption that FirstMover (after hitting a ball) does not perform any action while they
     #       wait for NextMover to hit the ball back. AKA an Agent only moves if a ball is approaching them.
