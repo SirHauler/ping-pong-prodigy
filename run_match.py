@@ -22,7 +22,7 @@ Game_RLAgent = RLAgent(position = {"lateral": Game_Table.default_lateral(for_pla
                                    "vertical": Game_Table.default_vertical(for_player="RL"),
                                    "depth": Game_Table.default_depth(for_player="RL")},
                     perception_latency = 0.5, # seconds
-                    max_velocity = 2,         # m/s
+                    max_velocity = 0.5,         # m/s
                     max_hit_speed = 50)       # m/s
 
 # The position of the ball depends on who's starting (default is Game_AIAgent starts)
