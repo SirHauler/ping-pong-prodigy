@@ -8,9 +8,9 @@
 # NOTE: 1.0 for naïve implementation, and lower for higher-level implementations
 ELASTICITY_FACTOR = 1.0
 # 5 ft wide, 9 ft long, 3 ft above table is acceptable
-TABLE_DIMENSIONS = {'x': (0, 5),
-                    'y': (0, 9),
-                    'z': (0, 3)}
+TABLE_DIMENSIONS = {'lateral': (0, 5),      # `x` is lateral
+                    'vertical': (0, 3),     # `y` is vertical
+                    'depth': (0, 9)}        # `z` is depth
 # ACCEPTABLE_DEVIATIONS = (0.5, 0.5)
 
 

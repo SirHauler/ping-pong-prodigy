@@ -6,6 +6,7 @@
 # @Last modified time: 2023-02-01T20:04:54-08:00
 
 from Components import AIAgent, RLAgent, Ball, Table, Game
+from _accessories.game_utils import inBounds
 
 # Initialize the table
 Game_Table = Table()
@@ -43,7 +44,7 @@ hit_time = time_step
 ACTION_LOG.append((time_step, FirstMover._id, "hit"))
 
 while(continue_playing := True):
-    Game_Ball.move(step_size = 1)
+    Game_Ball.move(step_forward = 1)
 
     # SUMMARY: Check whether we should terminate game.
     # LOGIC:
