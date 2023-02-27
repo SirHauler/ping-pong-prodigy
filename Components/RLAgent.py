@@ -7,8 +7,8 @@
 
 # EOF
 
-import Agent 
+from Agent import Agent
 
 class RLAgent(Agent):
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, lateral, vertical, depth, temporal_latency=..., agent_velocity=...):
+        super().__init__(lateral, vertical, depth, True, temporal_latency, agent_velocity)
