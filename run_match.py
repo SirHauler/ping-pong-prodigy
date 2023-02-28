@@ -37,7 +37,19 @@ Game_Ball = Ball(start_pos=FirstMover.position)
 
 # Start the game
 time_step = 0
-ACTION_LOG = []                   # Format: List[(time_step, NextMover._id, action of NextMover)]
+"""
+Format: {time_step: {"NextMover": NextMover._id, "Action": action of NextMover}}
+"""
+ACTION_LOG = []
+
+"""
+{time_step: {"AI": {"position": {"lateral": int, "vertical": int, "depth": int},
+                   "state": str(bool) },
+             "RL": {"position": {"lateral": int, "vertical": int, "depth": int},
+                   "state": str(bool) }},
+             "Ball": {"position": {"lateral": int, "vertical": int, "depth": int} }}
+"""
+VISUAL_LOG = []
 score = {"AI": 0 , "RL": 0}
 
 # SUMMARY: The AI Agent starts with the ball, so they make the first move.
@@ -80,7 +92,9 @@ while(continue_playing := True):
     #       wait for NextMover to hit the ball back. AKA an Agent only moves if a ball is approaching them.
 
     # SUMMARY: Before potentially swapping player assignments, log our action.
-    ACTION_LOG.append((time_step, NextMover._id, nextMover_action))
+    ACTION_LOG[time_step] = {"NextMover": NextMover._id, "Action": nextMover_action}
+
+    # TODO: Need to actually populate VISUAL_LOG
 
     # SUMMARY: Swap player assignments if required.
     # LOGIC:
@@ -92,6 +106,8 @@ while(continue_playing := True):
     
     # Proceed in time
     time_step += 1
+
+# TODO: Need to save `ACTION_LOG` and `VISUAL_LOG` to file.
 
 
 # EOF
