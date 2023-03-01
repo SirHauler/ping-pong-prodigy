@@ -1,31 +1,33 @@
 # import Table in order to define where player should be
-
 from Ball import Ball
-
-
 
 TEMPORAL_LATENCY = .5 # TODO
 AGENT_VELOCITY = 1    # TODO
-RLAGENT_START_LATERAL  = .5
+AGENT_HIT_SPEED = 1
+RLAGENT_START_LATERAL  = .5 # TODO: UPDATE X, Ys
 RLAGENT_START_DEPTH = .5
 AIAGENT_START_DEPTH = .5
 AIAGENT_START_LATERAL = .5
+MAX_VELOCITY = 1
+MIN_VELOCITY = 0
 
 
 """
 Description: Agent Class with general variables
 """
 class Agent: 
-    def __init__(self, lateral, vertical, depth, isRL,
+    def __init__(self, position, isRL,
                 temporal_latency=TEMPORAL_LATENCY, 
-                agent_velocity=AGENT_VELOCITY):
+                agent_velocity=AGENT_VELOCITY, 
+                max_hit_speed=AGENT_HIT_SPEED):
         
         self.init_position(isRL)
-        self.lateral = lateral  # TODO
-        self.vertical = vertical  # TODO
-        self.depth = depth  # TODO
+        self.position = position
+        self.maximum_velocity = MAX_VELOCITY
+        self.minimum_velocity = MIN_VELOCITY
         self.temporal_latency = temporal_latency
-        self.agent_velocity = agent_velocity
+        self.velocity = agent_velocity
+        self.max_hit_speed = max_hit_speed
     
     def update_pos(self, x, y, z):
         self.lateral = x
@@ -40,7 +42,5 @@ class Agent:
         else: 
             self.lateral = AIAGENT_START_LATERAL
             self.depth = AIAGENT_START_DEPTH
-    def perform_Action(self, ):
-        return 0
 
         

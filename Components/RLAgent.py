@@ -10,5 +10,7 @@
 from Agent import Agent
 
 class RLAgent(Agent):
-    def __init__(self, lateral, vertical, depth, temporal_latency=..., agent_velocity=...):
+    def __init__(self, lateral, vertical, depth, temporal_latency=..., agent_velocity=..., t=1):
         super().__init__(lateral, vertical, depth, True, temporal_latency, agent_velocity)
+        self._id = "RL"
+        self.t = t  # specifies time interval: seconds. By Defualt
