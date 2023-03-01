@@ -44,7 +44,7 @@ class AIAgent(Agent):
         self.save_t = t
         self.can_see = False
 
-
+    # TODO: SetVelocity Function Updates
     def hit(self, Ball): 
         """
         Follows a randomized policy in order to update ball. 

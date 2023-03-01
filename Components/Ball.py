@@ -32,7 +32,7 @@ class Ball:
         self._direction = {"lateral": 0, "vertical": 0, "depth": 0}
         self._velocity = {**self._direction, **self._speed}
 
-    def setVelocity(self, newVelocity: tuple(float)):
+    def setVelocity(self, newVelocity):
         """Sets the guts to a provided newVelocity."""
         assert len(newVelocity) == 4 and sorted(list(newVelocity.keys())) == sorted(["lateral", "vertical", "depth", "speed"])
         self._velocity = newVelocity
