@@ -7,11 +7,10 @@
 
 # EOF
 
-from Agent import Agent
-from Ball import Ball
+from .Agent import Agent
+from .Ball import Ball
 import numpy as np
-from Table import Table
-
+from .Table import Table
 
 TEMPORAL_LATENCY = 5  # in seconds
 
@@ -45,7 +44,7 @@ class AIAgent(Agent):
         self.can_see = False
 
     # TODO: SetVelocity Function Updates
-    def hit(self, Ball): 
+    def hit(self, Ball:Ball, serve=False): 
         """
         Follows a randomized policy in order to update ball. 
         Args:
@@ -54,11 +53,49 @@ class AIAgent(Agent):
         Returns: 
             None
         """
+        if (serve):
+            # negative or positive velocity? 
+            speed = np.random.uniform(0, self.max_hit_speed)
+            speed = speed if self.position["depth"] == 0 else (-1) * speed
 
+            # init all but only update depth
+            new_depth = 0
+            
+            if speed < 0: 
+                new_depth = self.position["depth"] - 1
+            else: 
+                new_depth = self.position["depth"] + 1
 
-        self.remaining_latency = self.temporal_latency  # reset the temporal latency
-        vector = np.array([0, 0, 0])
-        # TODO: Update Ball Velocity Vector, call Ball.update() method
+            velocity = {
+                "lateral": self.position["lateral"], 
+                "vertical": self.position["vertical"], 
+                "depth": new_depth,   # only update depth for direction
+                "speed": speed
+            }
+            Ball.setVelocity(newVelocity=velocity)
+        else: 
+            dir_mod_x = .2
+            dir_mod_y = 1
+            ball_x, ball_y = Ball._position["lateral"], Ball._position["depth"]
+            
+            min_x = ball_x - dir_mod_x
+            max_x = ball_x + dir_mod_x
+
+            # sample x direction & update directions
+            new_lateral, new_depth = np.random.uniform(min_x, max_x), ball_y + dir_mod_y
+
+            # sample hit speed
+            hit_speed = np.random.uniform(0, self.max_hit_speed)
+            newVelocity = {
+                "lateral": new_lateral, 
+                "vertical": 0,  # leave at 0 for 2D Implementation
+                "depth": new_depth, 
+                "speed": hit_speed
+            }
+
+            Ball.setVelocity(newVelocity=newVelocity)
+            self.remaining_latency = self.temporal_latency  # reset the temporal latency
+            # TODO: Update Ball Velocity Vector, call Ball.update() method
 
 
     
@@ -72,6 +109,11 @@ class AIAgent(Agent):
             action (str): Str denoting the action taken
         """
         t = self.t  # time interval that has passed
+
+        # serve if prompted
+        if (force == "hit"): 
+            self.hit(Ball=Ball, serve=True)
+
 
         # cannot see yet
         if self.remaining_latency > self.t: 
@@ -148,12 +190,12 @@ class AIAgent(Agent):
 
         will_interesect, x, y = self.lineIntersection(A, B, C, D)
 
-        print("My prediction of the ball: ", x, " ", y)
+        # print("My prediction of the ball: ", x, " ", y)
 
         future_pos_of_ball = (x, y)
         time_to_ball = self.timeToBall(D, future_pos_of_ball, Ball._velocity["speed"])
 
-        print("Time to get there: ", time_to_ball)
+        # print("Time to get there: ", time_to_ball)
 
         # TODO: UPDATE position representation of player
 
@@ -189,7 +231,7 @@ class AIAgent(Agent):
         
         if div == 0: 
             return False, -1, -1  # lines are parallel and will not intersect
-
+        
         d = (det(A, B), det(C, D))
 
         x = det(d, xdiff) / div
@@ -226,39 +268,29 @@ Game_AIAgent = AIAgent(position = {"lateral": 2.5,
                                 "depth": 9},
                 perception_latency = 0.5, # seconds
                 max_movement_speed = 0.5, # m/s
-                max_hit_speed = 50)       # m/s
+                max_hit_speed = 1 )       # m/s
 
-Game_Ball = Ball(start_pos={"lateral": 0,
+Game_Ball = Ball(start_pos={"lateral": 2.5,
                             "vertical": 0, 
-                            "depth": 0})
+                            "depth": 9})
 
-
-
-
-direction = {"lateral": 5,
+direction = {"lateral": 2.5,
             "vertical": 0, 
-            "depth": 9}
+            "depth": 8}
 
 speed = {"speed": 1}
 
 Game_Ball._velocity = {**direction, **speed}
 
-
-
-for i in range(9):
-    print("-------------------------------------------")
-    print("Time Step: ", i + 1)
-    print("Player: Before Action: ", Game_AIAgent.position)
-    print("Where the ball is now: ", Game_Ball._position["lateral"], " ", Game_Ball._position["depth"])
-    Game_Ball._position["depth"] += 1
-    print("Ball has moved to: ", Game_Ball._position["lateral"], " ", Game_Ball._position["depth"])
-    action = Game_AIAgent.performAction(Ball=Game_Ball)
-    print("Player: After Action: ", Game_AIAgent.position)
-    print("ACTION: ", action)
-    print("-------------------------------------------")
-
-
-
-
-
-# print(Game_Ball._velocity)
+# for i in range(9):
+#     print("-------------------------------------------")
+#     print("Time Step: ", i + 1)
+#     print("Player: Before Action: ", Game_AIAgent.position)
+#     print("Where the ball is now: ", Game_Ball._position["lateral"], " ", Game_Ball._position["depth"])
+#     Game_Ball._position["depth"] += 1
+#     print("Ball has moved to: ", Game_Ball._position["lateral"], " ", Game_Ball._position["depth"])
+#     action = Game_AIAgent.performAction(Ball=Game_Ball)
+#     print("Player: After Action: ", Game_AIAgent.position)
+#     print("Ball: Velocity ", Game_Ball._velocity)
+#     print("ACTION: ", action)
+#     print("-------------------------------------------")
