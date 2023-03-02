@@ -42,13 +42,19 @@ class Ball:
         """Helper to `move`. Updates where the ball is in space in 2- or 3-D."""
         if dims == 2:
             # TODO: Vectorize this if we have a performance bottleneck
-            for nature in ['lateral', 'vertical']:
-                self._position[nature] + self._velocity[nature] * step_forward
+            print(self._position)
+            print(self._velocity)
+            for nature in ['lateral', 'depth']:
+                # if nature == "depth":
+                #     print(self._velocity[nature] * step_forward)
+                self._position[nature] = self._position[nature] + self._velocity[nature] * step_forward
+            print(self._position)
         else:
             raise ValueError("Higher dimensions not supported yet.")
 
     def move(self, step_forward = 1):
         """SEE `_update_dimwise_position` docstring."""
+        print("\n\ninside 1")
         self._update_dimwise_position(dims=2, step_forward = step_forward)
         # self._update_dimwise_position(dims=3)
 

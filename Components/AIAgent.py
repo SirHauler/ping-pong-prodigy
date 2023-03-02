@@ -44,11 +44,11 @@ class AIAgent(Agent):
         self.can_see = False
 
     # TODO: SetVelocity Function Updates
-    def hit(self, Ball:Ball, serve=False): 
+    def hit(self, game_ball: Ball, serve=False): 
         """
         Follows a randomized policy in order to update ball. 
         Args:
-            ball (Ball): Ball Class
+            game_ball (Ball): Ball Class
 
         Returns: 
             None
@@ -58,25 +58,17 @@ class AIAgent(Agent):
             speed = np.random.uniform(0, self.max_hit_speed)
             speed = speed if self.position["depth"] == 0 else (-1) * speed
 
-            # init all but only update depth
-            new_depth = 0
-            
-            if speed < 0: 
-                new_depth = self.position["depth"] - 1
-            else: 
-                new_depth = self.position["depth"] + 1
-
             velocity = {
-                "lateral": self.position["lateral"], 
-                "vertical": self.position["vertical"], 
-                "depth": new_depth,   # only update depth for direction
+                "lateral": 0, 
+                "vertical": 0, 
+                "depth": (-1 if speed < 0 else 1) * speed,
                 "speed": speed
             }
-            Ball.setVelocity(newVelocity=velocity)
+            game_ball.setVelocity(newVelocity=velocity)
         else: 
             dir_mod_x = .2
             dir_mod_y = 1
-            ball_x, ball_y = Ball._position["lateral"], Ball._position["depth"]
+            ball_x, ball_y = game_ball._position["lateral"], game_ball._position["depth"]
             
             min_x = ball_x - dir_mod_x
             max_x = ball_x + dir_mod_x
@@ -93,13 +85,13 @@ class AIAgent(Agent):
                 "speed": hit_speed
             }
 
-            Ball.setVelocity(newVelocity=newVelocity)
+            game_ball.setVelocity(newVelocity=newVelocity)
             self.remaining_latency = self.temporal_latency  # reset the temporal latency
             # TODO: Update Ball Velocity Vector, call Ball.update() method
 
 
     
-    def performAction(self, Ball:Ball, force=None):  #TODO: Make sure to handle case where force = "hit"
+    def performAction(self, game_ball: Ball, force=None):  #TODO: Make sure to handle case where force = "hit"
         """
         Follows policy in order to perform an action
         Args:
@@ -112,7 +104,8 @@ class AIAgent(Agent):
 
         # serve if prompted
         if (force == "hit"): 
-            self.hit(Ball=Ball, serve=True)
+            self.hit(game_ball=game_ball, serve=True)
+            return "hit"
 
 
         # cannot see yet
@@ -126,7 +119,7 @@ class AIAgent(Agent):
         
         # project forward to see if Agent can move in time
         if not self.can_see:
-            _, self.ball_lateral, self.time_to_ball = self.projectForward(Ball)
+            _, self.ball_lateral, self.time_to_ball = self.projectForward(game_ball)
             self.can_see = True
 
         
@@ -135,7 +128,7 @@ class AIAgent(Agent):
         
         # got there before the ball did :p
         if (self.ball_lateral - self.position["lateral"] == 0 and self.time_to_ball <= 0): # TODO: Check the time aswell
-            self.hit(Ball=Ball)
+            self.hit(game_ball=Ball)
             return HIT
  
         # regardless of if they will make it, start moving towards ball
@@ -145,7 +138,7 @@ class AIAgent(Agent):
             sign = 1 if self.ball_lateral - self.position["lateral"] > 0 else -1
 
             # most ground AI can cover in a single time step
-            max_distance = abs(self.velocity * t)  
+            max_distance = abs(self._velocity * t)  
 
             # you are close enough to move exactly to the right spot
             if (max_distance > abs(self.ball_lateral - self.position["lateral"])): 
@@ -172,13 +165,13 @@ class AIAgent(Agent):
 
         # TODO: will it arrive in time to hit the ball?
     
-    def projectForward(self, Ball:Ball): 
+    def projectForward(self, game_ball: Ball): 
         """
         Projects the game ball forward and predicts whether or not 
         the agent will reach the ball
         """                
-        ball_pos = Ball._position
-        ball_velocity = Ball._velocity
+        ball_pos = game_ball._position
+        ball_velocity = game_ball._velocity
         
         # player points
         A = (0, 9)
@@ -193,7 +186,7 @@ class AIAgent(Agent):
         # print("My prediction of the ball: ", x, " ", y)
 
         future_pos_of_ball = (x, y)
-        time_to_ball = self.timeToBall(D, future_pos_of_ball, Ball._velocity["speed"])
+        time_to_ball = self.timeToBall(D, future_pos_of_ball, game_ball._velocity["speed"])
 
         # print("Time to get there: ", time_to_ball)
 
@@ -259,28 +252,26 @@ class AIAgent(Agent):
         return time
 
 
+# Game_Table = Table()
 
-        
-Game_Table = Table()
+# Game_AIAgent = AIAgent(position = {"lateral": 2.5,
+#                                 "vertical": 0,
+#                                 "depth": 9},
+#                 perception_latency = 0.5, # seconds
+#                 max_movement_speed = 0.5, # m/s
+#                 max_hit_speed = 1 )       # m/s
 
-Game_AIAgent = AIAgent(position = {"lateral": 2.5,
-                                "vertical": 0,
-                                "depth": 9},
-                perception_latency = 0.5, # seconds
-                max_movement_speed = 0.5, # m/s
-                max_hit_speed = 1 )       # m/s
+# Game_Ball = Ball(start_pos={"lateral": 2.5,
+#                             "vertical": 0, 
+#                             "depth": 9})
 
-Game_Ball = Ball(start_pos={"lateral": 2.5,
-                            "vertical": 0, 
-                            "depth": 9})
+# direction = {"lateral": 2.5,
+#             "vertical": 0, 
+#             "depth": 8}
 
-direction = {"lateral": 2.5,
-            "vertical": 0, 
-            "depth": 8}
+# speed = {"speed": 1}
 
-speed = {"speed": 1}
-
-Game_Ball._velocity = {**direction, **speed}
+# Game_Ball._velocity = {**direction, **speed}
 
 # for i in range(9):
 #     print("-------------------------------------------")

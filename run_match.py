@@ -55,10 +55,9 @@ VISUAL_LOG = {}
 score = {"AI": 0 , "RL": 0}
 
 # SUMMARY: The AI Agent starts with the ball, so they make the first move.
-print(Game_Ball._velocity)
-# TODO: Bug here?
+# TODO: Weird lateral velocity rounding
 FirstMover.performAction(Game_Ball, force="hit")
-print(Game_Ball._velocity)
+
 hit_time = time_step
 ACTION_LOG[time_step] = {"NextMover": FirstMover._id, "Action": "hit"}
 VISUAL_LOG[time_step] = {}
@@ -67,12 +66,9 @@ VISUAL_LOG[time_step]['AI'] = {"position": Game_AIAgent.position, "state": "true
 VISUAL_LOG[time_step]['RL'] = {"position": Game_RLAgent.position, "state": "false"}
 VISUAL_LOG[time_step]['Ball'] = {"position": Game_Ball._position}
 
-print(Game_Ball._position)
 
 while(continue_playing := True):
     Game_Ball.move(step_forward = 1)
-
-    # print(Game_Ball._position)
 
     # SUMMARY: Check whether we should terminate game.
     # LOGIC:
