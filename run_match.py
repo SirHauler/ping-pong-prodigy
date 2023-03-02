@@ -11,6 +11,7 @@ from Components.Table import Table
 from Components.Ball import Ball
 from _accessories.game_utils import inBounds
 import json
+import copy
 
 # Initialize the table
 Game_Table = Table()
@@ -21,17 +22,18 @@ Game_Table = Table()
 Game_AIAgent = AIAgent(position = Table.default_starting(for_player = "AI"),
                     perception_latency = 0.5, # seconds
                     max_movement_speed = 0.5, # m/s
-                    max_hit_speed = 50)       # m/s
+                    max_hit_speed = 0.25)       # m/s
 # Game_AIAgent.position
 
-Game_RLAgent = RLAgent(position = Table.default_starting(for_player = "RL"),
-                    perception_latency = 0.5, # seconds
-                    max_movement_speed = 0.5,       # m/s
-                    max_hit_speed = 50)       # m/s
-# Game_RLAgent.position
+# Game_RLAgent = RLAgent(position = Table.default_starting(for_player = "RL"),
+#                     perception_latency = 0.5, # seconds
+#                     max_movement_speed = 0.5,       # m/s
+#                     max_hit_speed = 0.25)       # m/s
+# # Game_RLAgent.position
 
 # Initialze who the primary and secondary players are
 FirstMover = Game_AIAgent
+Game_RLAgent = copy.deepcopy(Game_AIAgent)
 NextMover = Game_RLAgent
 
 # The position of the ball depends on who's starting (default is Game_AIAgent starts)
@@ -75,13 +77,13 @@ while(continue_playing := True):
     # Immediately after the ball is hit, we check if it's in bounds.
     #   If it isn't in bounds, then the person who just hit the ball (FirstMover) is at fault.
     #   In other words, !FirstMover = NextMover gets a point, and this game ends.
+    
     if not inBounds(Game_Ball, Game_Table):
         assert NextMover._id in ("AI", "RL")
+        print(f"{NextMover._id} gained a point.")
         score[NextMover._id] += 1
         time_step += 1
         break
-
-    raise ValueError("stop")
 
     # SUMMARY: NextMover performs an action, if it can.
     nextMover_action = "no-perception"
@@ -94,8 +96,12 @@ while(continue_playing := True):
     # `performAction` updates the guts of `Game_Ball` and assigns it a new velocity if player hits.
     # Assumption: an agent can only perform a single action at a time step. AKA, agent CANNOT re-adjust and hit ball at the same time.
 
-    DEBUG_preActionVel, DEBUG_preActionPos = Game_Ball._velocity, NextMover._position
+    # TODO: Add underscore to _position
+    DEBUG_preActionVel, DEBUG_preActionPos = Game_Ball._velocity, NextMover.position
     nextMover_action = NextMover.performAction(Game_Ball)
+
+    raise ValueError
+
     assert nextMover_action in ("no-perception", "re-adjusted", "hit")
     assert DEBUG_preActionVel != Game_Ball._velocity if nextMover_action == "hit" else DEBUG_preActionVel == Game_Ball._velocity
     assert DEBUG_preActionPos != NextMover._position if nextMover_action == "re-adjusted" else DEBUG_preActionPos == NextMover._position
