@@ -13,12 +13,26 @@ TABLE_DIMENSIONS = {'lateral': (0, 5),      # `x` is lateral
                     'depth': (0, 9)}        # `z` is depth
 # ACCEPTABLE_DEVIATIONS = (0.5, 0.5)
 
-
 class Table:
     def __init__(self, elasticity_factor=ELASTICITY_FACTOR, table_dims=TABLE_DIMENSIONS):
         self._elasticity_factor = elasticity_factor
         self._true_boundaries = table_dims
         # self._allowed_deviations = {'x': ACCEPTABLE_DEVIATIONS[0],
         #                             'y': ACCEPTABLE_DEVIATIONS[1]}
+    
+    @staticmethod
+    def default_starting(for_player=None):
+        assert for_player in ("AI", "RL")
+        if for_player == "AI":
+            return {"lateral": max(TABLE_DIMENSIONS['lateral']) / 2,    # Start in middle of side
+                    "vertical": max(TABLE_DIMENSIONS['vertical']),      # No impact
+                    "depth": min(TABLE_DIMENSIONS['depth'])}            # Only difference
+        elif for_player == "RL":
+            return {"lateral": max(TABLE_DIMENSIONS['lateral']) / 2,    # Start in middle of side
+                    "vertical": max(TABLE_DIMENSIONS['vertical']),      # No impact
+                    "depth": max(TABLE_DIMENSIONS['depth'])}            # Only difference
+
+    
+
 
 # EOF

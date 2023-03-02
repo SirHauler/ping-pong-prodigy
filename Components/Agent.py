@@ -1,5 +1,5 @@
 # import Table in order to define where player should be
-from Ball import Ball
+# from Ball import Ball
 
 TEMPORAL_LATENCY = .5 # TODO
 AGENT_VELOCITY = 1    # TODO

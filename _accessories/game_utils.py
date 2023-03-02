@@ -13,4 +13,7 @@ def inBounds(ball, table):
         # If the ball is not in-bounds in this dimension, then the ball is immediately out of bounds.
         if not (table._true_boundaries[dim][0] <= value <= table._true_boundaries[dim][1]):
             return False
-    return True
+    return 
+
+def getAgentData(agentObject):
+    return {"position": agentObject.position, "state": str(bool) }

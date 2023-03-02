@@ -7,9 +7,9 @@
 
 # EOF
 
-from AIAgent import AIAgent
-from RLAgent import RLAgent
-from Table import Table
+from Components.AIAgent import AIAgent
+from Components.RLAgent import RLAgent
+from Components.Table import Table
 
 """
 What it does: 
