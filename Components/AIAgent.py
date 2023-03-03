@@ -1,8 +1,8 @@
-# @Author: shounak
+# @Author: Alex Alvarado-Barahona
 # @Date:   2023-02-01T20:02:28-08:00
-# @Email:  shounak@stanford.edu
+# @Email:  alexaab@stanford.edu
 # @Filename: AIAgent.py
-# @Last modified by:   shounak
+# @Last modified by:   Alex
 # @Last modified time: 2023-02-01T20:03:37-08:00
 
 # EOF
@@ -42,6 +42,8 @@ class AIAgent(Agent):
         self.t = t  # measurement of time: seconds. By Defualt. 
         self.save_t = t
         self.can_see = False
+        self.will_make_it = False
+        self.direction = 1 if self.position["depth"] == 0 else (-1)
 
     # TODO: SetVelocity Function Updates
     def hit(self, game_ball: Ball, serve=False): 
@@ -55,7 +57,7 @@ class AIAgent(Agent):
         """
         if (serve):
             # negative or positive velocity? 
-            speed = np.random.uniform(0, self.max_hit_speed)
+            speed = np.random.uniform(.5, self.max_hit_speed)
             speed = speed if self.position["depth"] == 0 else (-1) * speed
 
             velocity = {
@@ -65,33 +67,43 @@ class AIAgent(Agent):
                 "speed": speed
             }
             game_ball.setVelocity(newVelocity=velocity)
+
+        # hit the ball in a random location in bounds! # TODO: Update to allow the ball to not be perfectly hit!
         else: 
-            dir_mod_x = .2
-            dir_mod_y = 1
-            ball_x, ball_y = game_ball._position["lateral"], game_ball._position["depth"]
             
-            min_x = ball_x - dir_mod_x
-            max_x = ball_x + dir_mod_x
+            left_lateral = self.position["lateral"]  # distance from x = 0
+            right_lateral = 5 - self.position["lateral"]  # distance from x = 5
 
-            # sample x direction & update directions
-            new_lateral, new_depth = np.random.uniform(min_x, max_x), ball_y + dir_mod_y
+            ball_to_other_end = 9 - game_ball._position["depth"] if self.direction == 1 else game_ball._position["depth"]  # distance between ball and the other 
+            
+            depth_velocity = self.direction * np.random.uniform(0, self.max_hit_speed)  # randomly sample depth velocity
 
-            # sample hit speed
-            hit_speed = np.random.uniform(0, self.max_hit_speed)
+            time_to_other_end = ball_to_other_end/depth_velocity  # how much time until ball gets to the other end
+
+            # now calculate possible lateral_velocity params
+            left_velocity = (-1) * left_lateral/time_to_other_end  # max left_lateral velocity that can be applied
+            right_velocity = right_lateral/time_to_other_end        # max right_lateral velcity that can be applied
+
+            # sample from left and right
+            lateral_velocity = np.random.uniform(left_velocity, right_velocity)
+
             newVelocity = {
-                "lateral": new_lateral, 
-                "vertical": 0,  # leave at 0 for 2D Implementation
-                "depth": new_depth, 
-                "speed": hit_speed
+                "lateral": lateral_velocity,  
+                "vertical": 0, 
+                "depth": depth_velocity, 
+                "speed": 0
             }
+
 
             game_ball.setVelocity(newVelocity=newVelocity)
             self.remaining_latency = self.temporal_latency  # reset the temporal latency
-            # TODO: Update Ball Velocity Vector, call Ball.update() method
+        
+        # reset perception
+        self.can_see = False
 
 
     
-    def performAction(self, game_ball: Ball, force=None):  #TODO: Make sure to handle case where force = "hit"
+    def performAction(self, game_ball: Ball, force=None): 
         """
         Follows policy in order to perform an action
         Args:
@@ -104,9 +116,8 @@ class AIAgent(Agent):
 
         # serve if prompted
         if (force == "hit"): 
-            self.hit(game_ball=game_ball, serve=True)
+            self.hit(game_ball, serve=True)
             return "hit"
-
 
         # cannot see yet
         if self.remaining_latency > self.t: 
@@ -119,7 +130,7 @@ class AIAgent(Agent):
         
         # project forward to see if Agent can move in time
         if not self.can_see:
-            _, self.ball_lateral, self.time_to_ball = self.projectForward(game_ball)
+            _, self.ball_lateral, self.time_to_ball, self.will_make_it = self.projectForward(game_ball)
             self.can_see = True
 
         
@@ -127,9 +138,19 @@ class AIAgent(Agent):
 
         
         # got there before the ball did :p
-        if (self.ball_lateral - self.position["lateral"] == 0 and self.time_to_ball <= 0): # TODO: Check the time aswell
-            self.hit(game_ball=Ball)
-            return HIT
+        
+        if (self.direction == 1): 
+            if (self.position["depth"] - game_ball._position["depth"] >= 0 and self.will_make_it and self.time_to_ball <= 0): 
+                self.hit(game_ball=game_ball)
+                return HIT
+        else: 
+            if (self.position["depth"] - game_ball._position["depth"] <= 0 and self.will_make_it and self.time_to_ball <= 0): 
+                self.hit(game_ball=game_ball)
+                return HIT
+
+
+        # TODO: tolerance built in for hitting
+
  
         # regardless of if they will make it, start moving towards ball
         if abs(self.ball_lateral - self.position["lateral"]) > 0: 
@@ -138,7 +159,7 @@ class AIAgent(Agent):
             sign = 1 if self.ball_lateral - self.position["lateral"] > 0 else -1
 
             # most ground AI can cover in a single time step
-            max_distance = abs(self._velocity * t)  
+            max_distance = abs(self.velocity * t)  
 
             # you are close enough to move exactly to the right spot
             if (max_distance > abs(self.ball_lateral - self.position["lateral"])): 
@@ -156,15 +177,19 @@ class AIAgent(Agent):
             
             # you are in the right position 
         
-        if (self.ball_lateral - self.position["lateral"]== 0 and self.time_to_ball <= 0):
-            self.hit(Ball=Ball)
-            return HIT
+        if (self.direction == 1): 
+            if (self.position["depth"] - game_ball._position["depth"] >= 0 and self.will_make_it and self.time_to_ball <= 0): 
+                self.hit(game_ball=game_ball)
+                return HIT
+        else: 
+            if (self.position["depth"] - game_ball._position["depth"] <= 0 and self.will_make_it and self.time_to_ball <= 0): 
+                self.hit(game_ball=game_ball)
+                return HIT
 
         return MOVE
         
 
-        # TODO: will it arrive in time to hit the ball?
-    
+    # TODO: update so that x component of velocity is reflected in time calculation ---- I think this if fine b/c I use the velocity will give me the other point for the calulation. Just in case I will keep this in here. 
     def projectForward(self, game_ball: Ball): 
         """
         Projects the game ball forward and predicts whether or not 
@@ -173,22 +198,26 @@ class AIAgent(Agent):
         ball_pos = game_ball._position
         ball_velocity = game_ball._velocity
         
-        # player points
-        A = (0, 9)
-        B = (5, 9)
+        # player points -- dependent on which side they are on
+        A = (0, 0) if self.position["depth"] == 0 else (0, 9)
+        B = (0, 5) if self.position["depth"] == 0 else (5, 9)
         # ball points
-        C = (ball_velocity["lateral"], ball_velocity["depth"]) # x, y
+        C = (ball_pos["lateral"] + ball_velocity["lateral"], ball_pos["depth"] + ball_velocity["depth"]) # x, y
         D = (ball_pos["lateral"], ball_pos["depth"]) # x, y
 
-
-        will_interesect, x, y = self.lineIntersection(A, B, C, D)
+        will_interesect, x, y = self.lineIntersection(game_ball)
 
         # print("My prediction of the ball: ", x, " ", y)
 
         future_pos_of_ball = (x, y)
-        time_to_ball = self.timeToBall(D, future_pos_of_ball, game_ball._velocity["speed"])
+        time_to_ball = self.timeToBall(D, future_pos_of_ball, ball_velocity["depth"])
 
-        # print("Time to get there: ", time_to_ball)
+        # will you make it to the ball? 
+        distance_to_ball = abs(x - self.position["lateral"])
+        players_time_to_ball = distance_to_ball/self.maximum_velocity
+        will_make_it = False
+        if time_to_ball - players_time_to_ball >= 0: 
+            will_make_it = True
 
         # TODO: UPDATE position representation of player
 
@@ -197,13 +226,13 @@ class AIAgent(Agent):
         
 
         if (will_interesect): 
-            return True, x, time_to_ball
+            return True, x, time_to_ball, will_make_it
         
-        return False, -1, -1
+        return False, -1, -1, False
 
     
 
-    def lineIntersection(self, A, B, C, D): 
+    def lineIntersection(self, game_ball:Ball): 
         """
         Provide 4 points with the first 2 corresponding
         to one line and the next two to another.
@@ -214,26 +243,21 @@ class AIAgent(Agent):
             C (tuple): point
             D (tuple): point
         """
-        xdiff = (A[0] - B[0], C[0] - D[0])
-        ydiff = (A[1] - B[1], C[1] - D[1])
-
-        def det (a, b): 
-            return a[0] * b[1] - a[1] * b[0]
         
-        div = det(xdiff, ydiff)
-        
-        if div == 0: 
-            return False, -1, -1  # lines are parallel and will not intersect
-        
-        d = (det(A, B), det(C, D))
+        # ydiff between player and ball 
+        ydiff = game_ball._position["depth"] if self.direction == 1 else self.position["depth"] - game_ball._position["depth"]
+        game_y_velocity = game_ball._velocity["depth"]
 
-        x = det(d, xdiff) / div
+        time_ball_to_other_end =abs(ydiff/game_y_velocity)
 
-        y = det(d, ydiff) / div
+        x = game_ball._position["lateral"] + game_ball._velocity["lateral"] * time_ball_to_other_end
+        y = 0 if self.direction == 1 else 9
 
         return True, x, y
+
+
     
-    def timeToBall(self, A, B, ball_velocity): 
+    def timeToBall(self, A, B, ball_depth_velocity): 
         """
         Calculates the amount of time needed to
         reach the ball given the current velocity
@@ -243,13 +267,8 @@ class AIAgent(Agent):
             A (tuple): point
             B (tuple): point
         """
-        a = abs(A[0] - B[0])
-        b = abs(A[1] - B[1])
-
-        d = np.sqrt(a**2 + b**2)
-        time = d/ball_velocity
-
-        return time
+        ydiff = abs(A[1] - B[1])
+        return abs(ydiff/ball_depth_velocity)  # time
 
 
 # Game_Table = Table()
@@ -273,14 +292,14 @@ class AIAgent(Agent):
 
 # Game_Ball._velocity = {**direction, **speed}
 
-# for i in range(9):
+# for i in range(7):
 #     print("-------------------------------------------")
 #     print("Time Step: ", i + 1)
 #     print("Player: Before Action: ", Game_AIAgent.position)
 #     print("Where the ball is now: ", Game_Ball._position["lateral"], " ", Game_Ball._position["depth"])
 #     Game_Ball._position["depth"] += 1
 #     print("Ball has moved to: ", Game_Ball._position["lateral"], " ", Game_Ball._position["depth"])
-#     action = Game_AIAgent.performAction(Ball=Game_Ball)
+#     action = Game_AIAgent.performAction(game_ball=Game_Ball)
 #     print("Player: After Action: ", Game_AIAgent.position)
 #     print("Ball: Velocity ", Game_Ball._velocity)
 #     print("ACTION: ", action)

@@ -9,7 +9,6 @@ import numpy as np
 
 # NOTE: 1.0 for naïve implementation, and lower for higher-level implementations
 from Components.Table import TABLE_DIMENSIONS
-
 ELASTICITY_FACTOR = 1.0
 # NOTE: For naïve implementation, this value is not used.
 BALL_WEIGHT = 2.7 * 10e-3  # in kilograms

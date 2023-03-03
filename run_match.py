@@ -22,7 +22,11 @@ Game_Table = Table()
 Game_AIAgent = AIAgent(position = Table.default_starting(for_player = "AI"),
                     perception_latency = 0.5, # seconds
                     max_movement_speed = 0.5, # m/s
-                    max_hit_speed = 0.25)       # m/s
+                    max_hit_speed = 1)       # m/s
+Game_RLAgent = AIAgent(position = Table.default_starting(for_player = "RL"),
+                    perception_latency = 0.5, # seconds
+                    max_movement_speed = 0.5, # m/s
+                    max_hit_speed = 1)       # m/s
 # Game_AIAgent.position
 
 # Game_RLAgent = RLAgent(position = Table.default_starting(for_player = "RL"),
@@ -33,11 +37,12 @@ Game_AIAgent = AIAgent(position = Table.default_starting(for_player = "AI"),
 
 # Initialze who the primary and secondary players are
 FirstMover = Game_AIAgent
-Game_RLAgent = copy.deepcopy(Game_AIAgent)
+# Game_RLAgent = copy.deepcopy(Game_AIAgent)
 NextMover = Game_RLAgent
 
 # The position of the ball depends on who's starting (default is Game_AIAgent starts)
-Game_Ball = Ball(start_pos=FirstMover.position)
+ball_pos = copy.deepcopy(FirstMover.position)
+Game_Ball = Ball(start_pos=ball_pos)
 
 # Start the game
 time_step = 0
@@ -60,6 +65,9 @@ score = {"AI": 0 , "RL": 0}
 # TODO: Weird lateral velocity rounding
 FirstMover.performAction(Game_Ball, force="hit")
 
+print("velocity of ball after serve: ", Game_Ball._velocity)
+print("position of ball after serve: ", Game_Ball._position)
+
 hit_time = time_step
 ACTION_LOG[time_step] = {"NextMover": FirstMover._id, "Action": "hit"}
 VISUAL_LOG[time_step] = {}
@@ -71,6 +79,8 @@ VISUAL_LOG[time_step]['Ball'] = {"position": Game_Ball._position}
 
 while(continue_playing := True):
     Game_Ball.move(step_forward = 1)
+
+    # print("Ball Has Moved To: ", Game_Ball._position)
 
     # SUMMARY: Check whether we should terminate game.
     # LOGIC:
@@ -84,6 +94,9 @@ while(continue_playing := True):
         score[NextMover._id] += 1
         time_step += 1
         break
+    # TODO: don't check out of bounds until after the player has made a move, 
+    # it's possible that the ball will be slightly out of bounds but the player does hit it on time
+
 
     # SUMMARY: NextMover performs an action, if it can.
     nextMover_action = "no-perception"
@@ -96,15 +109,20 @@ while(continue_playing := True):
     # `performAction` updates the guts of `Game_Ball` and assigns it a new velocity if player hits.
     # Assumption: an agent can only perform a single action at a time step. AKA, agent CANNOT re-adjust and hit ball at the same time.
 
+    # print("before: performAction: ", NextMover.position)
     # TODO: Add underscore to _position
     DEBUG_preActionVel, DEBUG_preActionPos = Game_Ball._velocity, NextMover.position
     nextMover_action = NextMover.performAction(Game_Ball)
 
-    raise ValueError
+    # print("nextMove_Action: ", nextMover_action)
+    # print("nextMover_Position: ", NextMover.position)
+
 
     assert nextMover_action in ("no-perception", "re-adjusted", "hit")
     assert DEBUG_preActionVel != Game_Ball._velocity if nextMover_action == "hit" else DEBUG_preActionVel == Game_Ball._velocity
-    assert DEBUG_preActionPos != NextMover._position if nextMover_action == "re-adjusted" else DEBUG_preActionPos == NextMover._position
+    # assert DEBUG_preActionPos != NextMover.position if nextMover_action == "re-adjusted" else DEBUG_preActionPos == NextMover.position
+    # NOTE: This is commented out because the player can stay in the same position
+
 
     # NOTE: We make an assumption that FirstMover (after hitting a ball) does not perform any action while they
     #       wait for NextMover to hit the ball back. AKA an Agent only moves if a ball is approaching them.
