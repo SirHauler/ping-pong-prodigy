@@ -9,7 +9,7 @@ from Components.AIAgent import AIAgent
 from Components.RLAgent import RLAgent
 from Components.Table import Table
 from Components.Ball import Ball
-from _accessories.game_utils import inBounds
+from _accessories.game_utils import inBounds, storeLog
 import json
 import copy
 
@@ -22,11 +22,11 @@ Game_Table = Table()
 Game_AIAgent = AIAgent(position = Table.default_starting(for_player = "AI"),
                     perception_latency = 0.5, # seconds
                     max_movement_speed = 0.5, # m/s
-                    max_hit_speed = 1)       # m/s
+                    max_hit_speed = 0.5)       # m/s
 Game_RLAgent = AIAgent(position = Table.default_starting(for_player = "RL"),
                     perception_latency = 0.5, # seconds
                     max_movement_speed = 0.5, # m/s
-                    max_hit_speed = 1)       # m/s
+                    max_hit_speed = 0.5)       # m/s
 # Game_AIAgent.position
 
 # Game_RLAgent = RLAgent(position = Table.default_starting(for_player = "RL"),
@@ -65,20 +65,21 @@ score = {"AI": 0 , "RL": 0}
 # TODO: Weird lateral velocity rounding
 FirstMover.performAction(Game_Ball, force="hit")
 
-print("velocity of ball after serve: ", Game_Ball._velocity)
-print("position of ball after serve: ", Game_Ball._position)
+# print("velocity of ball after serve: ", Game_Ball._velocity)
+# print("position of ball after serve: ", Game_Ball._position)
 
-hit_time = time_step
-ACTION_LOG[time_step] = {"NextMover": FirstMover._id, "Action": "hit"}
 VISUAL_LOG[time_step] = {}
-# TODO: The "state" is hardcoded since we don't care about this too much for the visualization
-VISUAL_LOG[time_step]['AI'] = {"position": Game_AIAgent.position, "state": "true"}
-VISUAL_LOG[time_step]['RL'] = {"position": Game_RLAgent.position, "state": "false"}
-VISUAL_LOG[time_step]['Ball'] = {"position": Game_Ball._position}
-
+ACTION_LOG[time_step], VISUAL_LOG[time_step] = storeLog(FirstMover, Game_AIAgent, Game_RLAgent, Game_Ball)
 
 while(continue_playing := True):
+<<<<<<< Updated upstream
     assert time_step != 200
+=======
+
+    if time_step > 1500:
+        break
+
+>>>>>>> Stashed changes
     Game_Ball.move(step_forward = 1)
 
     print("Ball Has Moved To: ", Game_Ball._position)
@@ -89,12 +90,26 @@ while(continue_playing := True):
     #   If it isn't in bounds, then the person who just hit the ball (FirstMover) is at fault.
     #   In other words, !FirstMover = NextMover gets a point, and this game ends.
     
+<<<<<<< Updated upstream
     # if not inBounds(Game_Ball, Game_Table):
     #     assert NextMover._id in ("AI", "RL")
     #     print(f"{NextMover._id} gained a point.")
     #     score[NextMover._id] += 1
     #     time_step += 1
     #     break
+=======
+    if not inBounds(Game_Ball, Game_Table):
+        assert NextMover._id in ("AI", "RL")
+        print(f"{NextMover._id} gained a point.")
+
+        VISUAL_LOG[time_step] = {}
+        ACTION_LOG[time_step], VISUAL_LOG[time_step] = storeLog(FirstMover, Game_AIAgent, Game_RLAgent, Game_Ball)
+
+        score[NextMover._id] += 1
+        time_step += 1
+        break
+
+>>>>>>> Stashed changes
     # TODO: don't check out of bounds until after the player has made a move, 
     # it's possible that the ball will be slightly out of bounds but the player does hit it on time
 
@@ -129,14 +144,9 @@ while(continue_playing := True):
     #       wait for NextMover to hit the ball back. AKA an Agent only moves if a ball is approaching them.
 
     # SUMMARY: Before potentially swapping player assignments, log our action.
-    ACTION_LOG[time_step] = {"NextMover": NextMover._id, "Action": nextMover_action}
-
-    # TODO: Need to actually populate VISUAL_LOG
+    
     VISUAL_LOG[time_step] = {}
-    # TODO: The "state" is hardcoded since we don't care about this too much for the visualization
-    VISUAL_LOG[time_step]['AI'] = {"position": Game_AIAgent.position, "state": "true"}
-    VISUAL_LOG[time_step]['RL'] = {"position": Game_RLAgent.position, "state": "false"}
-    VISUAL_LOG[time_step]['Ball'] = {"position": Game_Ball._position}
+    ACTION_LOG[time_step], VISUAL_LOG[time_step] = storeLog(FirstMover, Game_AIAgent, Game_RLAgent, Game_Ball)
 
     # SUMMARY: Swap player assignments if required.
     # LOGIC:
@@ -148,6 +158,8 @@ while(continue_playing := True):
     
     # Proceed in time
     time_step += 1
+
+# print(json.dumps(VISUAL_LOG, sort_keys=False, indent=4))
 
 # TODO: Need to save `ACTION_LOG` and `VISUAL_LOG` to file.
 with open("Logs/ACTION_LOG.json", "w") as f:

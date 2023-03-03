@@ -19,3 +19,13 @@ def inBounds(ball, table):
 
 def getAgentData(agentObject):
     return {"position": agentObject.position, "state": str(bool) }
+
+def storeLog(FirstMover, Game_AIAgent, Game_RLAgent, Game_Ball):
+    ACTION_LOG_T = {"NextMover": FirstMover._id, "Action": "hit"}
+    VISUAL_LOG_T = {}
+    # TODO: The "state" is hardcoded since we don't care about this too much for the visualization
+    VISUAL_LOG_T['AI'] = {"position": Game_AIAgent.position.copy(), "state": "true"}
+    VISUAL_LOG_T['RL'] = {"position": Game_RLAgent.position.copy(), "state": "false"}
+    VISUAL_LOG_T['Ball'] = {"position": Game_Ball._position.copy()}
+
+    return ACTION_LOG_T, VISUAL_LOG_T

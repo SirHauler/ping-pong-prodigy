@@ -37,7 +37,7 @@ from Components.Table import TABLE_DIMENSIONS
 import matplotlib.pyplot as plt
 from VizComponents.topView import _saveTopView
 from VizComponents._accessories import _make_video, _prepare_directory
-
+import json
 
 def _dummy_log_generator(dims=2):
     LOG = {}
@@ -115,7 +115,10 @@ def log_to_visualization(LOG, fps=60, dims=2):
         raise ValueError("4d viz - what're you on bro???")
 
 if __name__ == "__main__":
-    DUMMY_LOG = _dummy_log_generator()
-    log_to_visualization(DUMMY_LOG, fps=10, dims=2)
+    # LOG = _dummy_log_generator()
+    with open("Logs/VISUAL_LOG.json", "r") as fp:
+        LOG = json.load(fp)
+
+    log_to_visualization(LOG, fps=60, dims=2)
 
 # EOF
