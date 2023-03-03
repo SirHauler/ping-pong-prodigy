@@ -28,6 +28,8 @@ class Agent:
         self.temporal_latency = temporal_latency
         self.velocity = agent_velocity
         self.max_hit_speed = max_hit_speed
+        self.lateral_tolerance = .5
+        self.depth_tolerance = .5
     
     def update_pos(self, x, y, z):
         self.lateral = x

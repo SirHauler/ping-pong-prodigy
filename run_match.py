@@ -78,9 +78,10 @@ VISUAL_LOG[time_step]['Ball'] = {"position": Game_Ball._position}
 
 
 while(continue_playing := True):
+    assert time_step != 200
     Game_Ball.move(step_forward = 1)
 
-    # print("Ball Has Moved To: ", Game_Ball._position)
+    print("Ball Has Moved To: ", Game_Ball._position)
 
     # SUMMARY: Check whether we should terminate game.
     # LOGIC:
@@ -88,12 +89,12 @@ while(continue_playing := True):
     #   If it isn't in bounds, then the person who just hit the ball (FirstMover) is at fault.
     #   In other words, !FirstMover = NextMover gets a point, and this game ends.
     
-    if not inBounds(Game_Ball, Game_Table):
-        assert NextMover._id in ("AI", "RL")
-        print(f"{NextMover._id} gained a point.")
-        score[NextMover._id] += 1
-        time_step += 1
-        break
+    # if not inBounds(Game_Ball, Game_Table):
+    #     assert NextMover._id in ("AI", "RL")
+    #     print(f"{NextMover._id} gained a point.")
+    #     score[NextMover._id] += 1
+    #     time_step += 1
+    #     break
     # TODO: don't check out of bounds until after the player has made a move, 
     # it's possible that the ball will be slightly out of bounds but the player does hit it on time
 
@@ -109,13 +110,13 @@ while(continue_playing := True):
     # `performAction` updates the guts of `Game_Ball` and assigns it a new velocity if player hits.
     # Assumption: an agent can only perform a single action at a time step. AKA, agent CANNOT re-adjust and hit ball at the same time.
 
-    # print("before: performAction: ", NextMover.position)
+    print("before: performAction: ", NextMover.position)
     # TODO: Add underscore to _position
     DEBUG_preActionVel, DEBUG_preActionPos = Game_Ball._velocity, NextMover.position
     nextMover_action = NextMover.performAction(Game_Ball)
 
-    # print("nextMove_Action: ", nextMover_action)
-    # print("nextMover_Position: ", NextMover.position)
+    print("nextMove_Action: ", nextMover_action)
+    print("nextMover_Position: ", NextMover.position)
 
 
     assert nextMover_action in ("no-perception", "re-adjusted", "hit")

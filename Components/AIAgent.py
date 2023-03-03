@@ -57,7 +57,7 @@ class AIAgent(Agent):
         """
         if (serve):
             # negative or positive velocity? 
-            speed = np.random.uniform(.5, self.max_hit_speed)
+            speed = np.random.uniform(.25, self.max_hit_speed)
             speed = speed if self.position["depth"] == 0 else (-1) * speed
 
             velocity = {
@@ -76,7 +76,7 @@ class AIAgent(Agent):
 
             ball_to_other_end = 9 - game_ball._position["depth"] if self.direction == 1 else game_ball._position["depth"]  # distance between ball and the other 
             
-            depth_velocity = self.direction * np.random.uniform(0, self.max_hit_speed)  # randomly sample depth velocity
+            depth_velocity = self.direction * np.random.uniform(.25, self.max_hit_speed)  # randomly sample depth velocity
 
             time_to_other_end = ball_to_other_end/depth_velocity  # how much time until ball gets to the other end
 
@@ -138,13 +138,16 @@ class AIAgent(Agent):
 
         
         # got there before the ball did :p
-        
         if (self.direction == 1): 
-            if (self.position["depth"] - game_ball._position["depth"] >= 0 and self.will_make_it and self.time_to_ball <= 0): 
+            within_tolerance = True if game_ball._position["depth"] - self.position["depth"] < self.depth_tolerance else False
+            if (within_tolerance and self.will_make_it): 
+                # and self.position["depth"] - game_ball._position["depth"] >= 0
                 self.hit(game_ball=game_ball)
                 return HIT
         else: 
-            if (self.position["depth"] - game_ball._position["depth"] <= 0 and self.will_make_it and self.time_to_ball <= 0): 
+            within_tolerance = True if self.position["depth"] - game_ball._position["depth"] < self.depth_tolerance else False
+            if (within_tolerance and self.will_make_it): 
+                # and self.position["depth"] - game_ball._position["depth"] <= 0
                 self.hit(game_ball=game_ball)
                 return HIT
 
@@ -173,7 +176,12 @@ class AIAgent(Agent):
                     self.position["lateral"] = self.ball_lateral
             else: 
                 # move max_distance
-                self.position["lateral"] += max_distance * sign
+                if (self.ball_lateral < 0):
+                    self.position["lateral"] = 0
+                elif (self.ball_lateral > 5): 
+                    self.position["lateral"] = 5
+                else: 
+                    self.position["lateral"] += max_distance * sign
             
             # you are in the right position 
         
