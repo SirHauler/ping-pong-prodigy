@@ -72,14 +72,7 @@ VISUAL_LOG[time_step] = {}
 ACTION_LOG[time_step], VISUAL_LOG[time_step] = storeLog(FirstMover, Game_AIAgent, Game_RLAgent, Game_Ball)
 
 while(continue_playing := True):
-<<<<<<< Updated upstream
     assert time_step != 200
-=======
-
-    if time_step > 1500:
-        break
-
->>>>>>> Stashed changes
     Game_Ball.move(step_forward = 1)
 
     print("Ball Has Moved To: ", Game_Ball._position)
@@ -90,14 +83,6 @@ while(continue_playing := True):
     #   If it isn't in bounds, then the person who just hit the ball (FirstMover) is at fault.
     #   In other words, !FirstMover = NextMover gets a point, and this game ends.
     
-<<<<<<< Updated upstream
-    # if not inBounds(Game_Ball, Game_Table):
-    #     assert NextMover._id in ("AI", "RL")
-    #     print(f"{NextMover._id} gained a point.")
-    #     score[NextMover._id] += 1
-    #     time_step += 1
-    #     break
-=======
     if not inBounds(Game_Ball, Game_Table):
         assert NextMover._id in ("AI", "RL")
         print(f"{NextMover._id} gained a point.")
@@ -109,7 +94,6 @@ while(continue_playing := True):
         time_step += 1
         break
 
->>>>>>> Stashed changes
     # TODO: don't check out of bounds until after the player has made a move, 
     # it's possible that the ball will be slightly out of bounds but the player does hit it on time
 
