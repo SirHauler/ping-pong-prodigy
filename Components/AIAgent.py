@@ -74,11 +74,15 @@ class AIAgent(Agent):
             left_lateral = self.position["lateral"]  # distance from x = 0
             right_lateral = 5 - self.position["lateral"]  # distance from x = 5
 
-            ball_to_other_end = 9 - game_ball._position["depth"] if self.direction == 1 else game_ball._position["depth"]  # distance between ball and the other 
+            # ball_to_other_end = 9 - game_ball._position["depth"] if self.direction == 1 else game_ball._position["depth"]  # distance between ball and the other 
             
+            ball_to_other_end = 9 - game_ball._position["depth"] if self.direction == 1 else game_ball._position["depth"]  # distance between ball and the other 
+
+
+
             depth_velocity = self.direction * np.random.uniform(.25, self.max_hit_speed)  # randomly sample depth velocity
 
-            time_to_other_end = ball_to_other_end/depth_velocity  # how much time until ball gets to the other end
+            time_to_other_end = ball_to_other_end/abs(depth_velocity)  # how much time until ball gets to the other end
 
             # now calculate possible lateral_velocity params
             left_velocity = (-1) * left_lateral/time_to_other_end  # max left_lateral velocity that can be applied
@@ -166,23 +170,11 @@ class AIAgent(Agent):
 
             # you are close enough to move exactly to the right spot
             if (max_distance > abs(self.ball_lateral - self.position["lateral"])): 
-                
-                # respect the boundaries of the board
-                if (self.ball_lateral < 0):
-                    self.position["lateral"] = 0
-                elif (self.ball_lateral > 5): 
-                    self.position["lateral"] = 5
-                else: 
-                    self.position["lateral"] = self.ball_lateral
+                self._move(self.ball_lateral)
             else: 
                 # move max_distance
-                if (self.ball_lateral < 0):
-                    self.position["lateral"] = 0
-                elif (self.ball_lateral > 5): 
-                    self.position["lateral"] = 5
-                else: 
-                    self.position["lateral"] += max_distance * sign
-            
+                new_lateral = self.position["lateral"] + max_distance * sign
+                self._move(new_lateral)
             # you are in the right position 
         
         if (self.direction == 1): 
@@ -203,22 +195,20 @@ class AIAgent(Agent):
         Projects the game ball forward and predicts whether or not 
         the agent will reach the ball
         """                
-        ball_pos = game_ball._position
+        ball_x, ball_y = game_ball._position["lateral"], game_ball._position["depth"]
         ball_velocity = game_ball._velocity
         
         # player points -- dependent on which side they are on
         A = (0, 0) if self.position["depth"] == 0 else (0, 9)
         B = (0, 5) if self.position["depth"] == 0 else (5, 9)
         # ball points
-        C = (ball_pos["lateral"] + ball_velocity["lateral"], ball_pos["depth"] + ball_velocity["depth"]) # x, y
-        D = (ball_pos["lateral"], ball_pos["depth"]) # x, y
+        C = (ball_x + ball_velocity["lateral"], ball_y + ball_velocity["depth"]) # x, y
+        ball_pos = (ball_x, ball_y) # x, y
 
+        
         will_interesect, x, y = self.lineIntersection(game_ball)
-
-        # print("My prediction of the ball: ", x, " ", y)
-
         future_pos_of_ball = (x, y)
-        time_to_ball = self.timeToBall(D, future_pos_of_ball, ball_velocity["depth"])
+        time_to_ball = self.timeToBall(ball_pos, future_pos_of_ball, ball_velocity["depth"])
 
         # will you make it to the ball? 
         distance_to_ball = abs(x - self.position["lateral"])
@@ -256,7 +246,7 @@ class AIAgent(Agent):
         ydiff = game_ball._position["depth"] if self.direction == 1 else self.position["depth"] - game_ball._position["depth"]
         game_y_velocity = game_ball._velocity["depth"]
 
-        time_ball_to_other_end =abs(ydiff/game_y_velocity)
+        time_ball_to_other_end = abs(ydiff/game_y_velocity)
 
         x = game_ball._position["lateral"] + game_ball._velocity["lateral"] * time_ball_to_other_end
         y = 0 if self.direction == 1 else 9

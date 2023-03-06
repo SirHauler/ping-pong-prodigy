@@ -31,11 +31,14 @@ class Agent:
         self.lateral_tolerance = .5
         self.depth_tolerance = .5
     
-    def update_pos(self, x, y, z):
-        self.lateral = x
-        self.vertical = y
-        self.depth = z 
-    
+    # can only move laterally for now
+    def _move(self, new_lateral):
+        if new_lateral < 0: 
+            self.position["lateral"] = 0
+        elif new_lateral > 5: 
+            self.position["lateral"] = 5
+        else: 
+            self.position["lateral"] = new_lateral
 
     def init_position(self, isRL):
         if (isRL):
