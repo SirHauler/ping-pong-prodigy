@@ -43,7 +43,6 @@ class AIAgent(Agent):
         self.save_t = t
         self.can_see = False
         self.will_make_it = False
-        self.direction = 1 if self.position["depth"] == 0 else (-1)
 
     # TODO: SetVelocity Function Updates
     def hit(self, game_ball: Ball, serve=False): 
@@ -70,35 +69,7 @@ class AIAgent(Agent):
 
         # hit the ball in a random location in bounds! # TODO: Update to allow the ball to not be perfectly hit!
         else: 
-            
-            left_lateral = self.position["lateral"]  # distance from x = 0
-            right_lateral = 5 - self.position["lateral"]  # distance from x = 5
-
-            # ball_to_other_end = 9 - game_ball._position["depth"] if self.direction == 1 else game_ball._position["depth"]  # distance between ball and the other 
-            
-            ball_to_other_end = 9 - game_ball._position["depth"] if self.direction == 1 else game_ball._position["depth"]  # distance between ball and the other 
-
-
-
-            depth_velocity = self.direction * np.random.uniform(.25, self.max_hit_speed)  # randomly sample depth velocity
-
-            time_to_other_end = ball_to_other_end/abs(depth_velocity)  # how much time until ball gets to the other end
-
-            # now calculate possible lateral_velocity params
-            left_velocity = (-1) * left_lateral/time_to_other_end  # max left_lateral velocity that can be applied
-            right_velocity = right_lateral/time_to_other_end        # max right_lateral velcity that can be applied
-
-            # sample from left and right
-            lateral_velocity = np.random.uniform(left_velocity, right_velocity)
-
-            newVelocity = {
-                "lateral": lateral_velocity,  
-                "vertical": 0, 
-                "depth": depth_velocity, 
-                "speed": 0
-            }
-
-
+            newVelocity = self._defaultHit(2, 3, game_ball=game_ball)
             game_ball.setVelocity(newVelocity=newVelocity)
             self.remaining_latency = self.temporal_latency  # reset the temporal latency
         
