@@ -23,7 +23,7 @@ Game_RLAgent = RLAgent(position = Table.default_starting(for_player = "RL"),
                         max_movement_speed = 0.125, # m/s
                         max_hit_speed = 0.5)      # m/s
 
-for i in tqdm(range(1000)):
+for i in tqdm(range(5)):
     # Start the game
     time_step = 0
     """
@@ -169,7 +169,7 @@ for i in tqdm(range(1000)):
     
     continueRally = True
 
-Game_RLAgent.model.save('update-rlagent.h5')
+# Game_RLAgent.model.save('update-rlagent.h5')
 # TODO: Add time_step and Score to the visualization
 # TODO: Make visualization a bit faster
 

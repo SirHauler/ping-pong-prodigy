@@ -69,7 +69,7 @@ class AIAgent(Agent):
 
         # hit the ball in a random location in bounds! # TODO: Update to allow the ball to not be perfectly hit!
         else: 
-            epsilon = 0 if serve else 0
+            epsilon = 0 if serve else .025
             newVelocity = self._defaultHit(0, 5, game_ball=game_ball, epsilon=epsilon)
             game_ball.setVelocity(newVelocity=newVelocity)
             self.remaining_latency = self.temporal_latency  # reset the temporal latency
