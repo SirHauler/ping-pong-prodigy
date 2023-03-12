@@ -54,7 +54,7 @@ class AIAgent(Agent):
         Returns: 
             None
         """
-        if (serve):
+        if (False): # serve
             # negative or positive velocity? 
             speed = np.random.uniform(.25, self.max_hit_speed)
             speed = speed if self.position["depth"] == 0 else (-1) * speed
@@ -69,7 +69,8 @@ class AIAgent(Agent):
 
         # hit the ball in a random location in bounds! # TODO: Update to allow the ball to not be perfectly hit!
         else: 
-            newVelocity = self._defaultHit(2, 3, game_ball=game_ball)
+            epsilon = 0 if serve else 0
+            newVelocity = self._defaultHit(0, 5, game_ball=game_ball, epsilon=epsilon)
             game_ball.setVelocity(newVelocity=newVelocity)
             self.remaining_latency = self.temporal_latency  # reset the temporal latency
         
