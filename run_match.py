@@ -26,7 +26,7 @@ Game_RLAgent = RLAgent(position = Table.default_starting(for_player = "RL"),
 RL_WINS = 0
 AI_WINS = 0
 NUM_GAMES = 100
-EPSILON = .01
+EPSILON = .02
 
 for i in tqdm(range(NUM_GAMES)):
     # Start the game
@@ -59,8 +59,9 @@ for i in tqdm(range(NUM_GAMES)):
             Game_AIAgent = AIAgent(position = Table.default_starting(for_player = "AI"),
                     perception_latency = 2.5, # seconds
                     max_movement_speed = 0.5, # m/s
-                    max_hit_speed = 0.5)      # m/s
-
+                    max_hit_speed = 0.5,
+                    epsilon=EPSILON)      # m/s
+             
             Game_RLAgent._id = "RL"
 
             # Initialze who the primary and secondary players are
