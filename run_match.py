@@ -23,7 +23,12 @@ Game_RLAgent = RLAgent(position = Table.default_starting(for_player = "RL"),
                         max_movement_speed = 0.125, # m/s
                         max_hit_speed = 0.5)      # m/s
 
-for i in tqdm(range(5)):
+RL_WINS = 0
+AI_WINS = 0
+NUM_GAMES = 100
+EPSILON = .01
+
+for i in tqdm(range(NUM_GAMES)):
     # Start the game
     time_step = 0
     """
@@ -56,7 +61,6 @@ for i in tqdm(range(5)):
                     max_movement_speed = 0.5, # m/s
                     max_hit_speed = 0.5)      # m/s
 
-            
             Game_RLAgent._id = "RL"
 
             # Initialze who the primary and secondary players are
@@ -163,15 +167,24 @@ for i in tqdm(range(5)):
             continueRally = max(list(score.values())) < WINNING_POINTS
             if (continueRally == False):
                 Game_RLAgent.endOfEpisode(tape)
+                if score["AI"] == WINNING_POINTS: 
+                    AI_WINS += 1
+                else: 
+                    RL_WINS += 1
+
+
+
     print(f"Game #{i + 1} Complete")
     print("Score: ", score)
     score = {"AI": 0 , "RL": 0}
-    
     continueRally = True
 
-# Game_RLAgent.model.save('update-rlagent.h5')
+# Game_RLAgent.model.save('7000g-rlagent.h5')
 # TODO: Add time_step and Score to the visualization
 # TODO: Make visualization a bit faster
+
+print(f"AI WINS: {AI_WINS} and RL WINS: {RL_WINS}")
+print(f"Ratio of Wins: {RL_WINS/NUM_GAMES}")
 
 with open("Logs/ACTION_LOG.json", "w") as f:
     json.dump(ACTION_LOG, f)
