@@ -16,7 +16,13 @@ import copy
 # Initialize the table
 Game_Table = Table()
 
+NUM_GAMES = 10
+
+# TODO: Support multiple games
+# TODO: Different bound functions in game_utils.py
+
 # Start the game
+RALLY_NUMBER = 0
 time_step = 0
 """
 Format: {time_step: {"NextMover": NextMover._id, "Action": action of NextMover}}
@@ -42,10 +48,12 @@ while (continueRally):
                         perception_latency = 2.5, # seconds
                         max_movement_speed = 0.5, # m/s
                         max_hit_speed = 0.5)      # m/s
+    # NOTE: This is AI vs. AI
     Game_RLAgent = AIAgent(position = Table.default_starting(for_player = "RL"),
                         perception_latency = 2.5, # seconds
                         max_movement_speed = 0.5, # m/s
                         max_hit_speed = 0.5)      # m/s
+    Game_RLAgent._id = "RL"
 
     # Initialze who the primary and secondary players are
     FirstMover = Game_AIAgent
@@ -67,12 +75,13 @@ while (continueRally):
         # SUMMARY: Check whether we should terminate game.
         # LOGIC:
         # Immediately after the ball is hit, we check if it's in bounds.
-        #   If it isn't in bounds, then the person who just hit the ball (FirstMover) is at fault.
-        #   In other words, !FirstMover = NextMover gets a point, and this game ends.
+        #   If it isn't in bounds laterally, then the person who just hit the ball (FirstMover) is at fault.
+        #   > In other words, !FirstMover = NextMover gets a point, and this game ends.
+        #   If it isn't in bounds depthly, then the person who should've hit the ball (NextMover) is at fault.
         
-        if not inBounds(Game_Ball, Game_Table):
+        if not inBounds(Game_Ball, Game_Table, dim='lateral'):
             assert NextMover._id in ("AI", "RL")
-            print(f"{NextMover._id} gained a point.")
+            print(f"{NextMover._id} gained a point. The ball was hit out of bounds either on a serve or main file.")
 
             VISUAL_LOG[time_step] = {}
             ACTION_LOG[time_step], VISUAL_LOG[time_step] = storeLog(FirstMover, Game_AIAgent, Game_RLAgent, Game_Ball)
@@ -80,6 +89,18 @@ while (continueRally):
             score[NextMover._id] += 1
             time_step += 1
             break
+        
+        if not inBounds(Game_Ball, Game_Table, dim='depth'):
+            assert NextMover._id in ("AI", "RL")
+            print(f"{FirstMover._id} gained a point. {NextMover._id} should've hit the ball.")
+
+            VISUAL_LOG[time_step] = {}
+            ACTION_LOG[time_step], VISUAL_LOG[time_step] = storeLog(FirstMover, Game_AIAgent, Game_RLAgent, Game_Ball)
+
+            score[FirstMover._id] += 1
+            time_step += 1
+            break
+
 
         # SUMMARY: NextMover performs an action, if it can.
         nextMover_action = "no-perception"
@@ -107,6 +128,8 @@ while (continueRally):
         # SUMMARY: Before potentially swapping player assignments, log our action.
         VISUAL_LOG[time_step] = {}
         ACTION_LOG[time_step], VISUAL_LOG[time_step] = storeLog(FirstMover, Game_AIAgent, Game_RLAgent, Game_Ball)
+        VISUAL_LOG[time_step]['Score'] = score
+        VISUAL_LOG[time_step]['Rally_Number'] = RALLY_NUMBER
 
         # SUMMARY: Swap player assignments if required.
         # LOGIC:
@@ -119,15 +142,17 @@ while (continueRally):
         time_step += 1
 
     print(f"Rally Completed.\nScore is now {score}.\n\n")
-    continueRally = max(list(score.values())) <= 21
+    RALLY_NUMBER += 1
+    continueRally = max(list(score.values())) <= WINNING_POINTS
 
 # TODO: Add time_step and Score to the visualization
 # TODO: Make visualization a bit faster
 
+# The action log doesn't actually help for visualization, just debugging
 with open("Logs/ACTION_LOG.json", "w") as f:
-    json.dump(ACTION_LOG, f)
+    json.dump(ACTION_LOG, f, indent=4, sort_keys=False)
 
 with open("Logs/VISUAL_LOG.json", "w") as f:
-    json.dump(VISUAL_LOG, f)
+    json.dump(VISUAL_LOG, f, indent=4, sort_keys=False)
 
 # EOF
