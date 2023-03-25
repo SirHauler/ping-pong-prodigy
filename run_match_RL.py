@@ -102,8 +102,8 @@ while (continueRally):
             break
 
 
-        # SUMMARY: NextMover performs an action, if it can.
-        nextMover_action = "no-perception"
+        # # SUMMARY: NextMover performs an action, if it can.
+        # nextMover_action = "no-perception"
         # LOGIC:
         # If NextMover can perceive the ball some arbitrary time after FirstMover hit the ball,
         #   NextMover can either adjust their own ready-position or – if objectively REQUIRED – hit the ball.
