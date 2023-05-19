@@ -1,6 +1,6 @@
 # ping-pong-prodigy
 
-2D Simulation of a Ping-Pong Match! This repo contains 3 Models each containing weights for a Reinforcement Learning agent trained on a different nubmer of games (5000, 6000, and 7000 games). The 7000 gamem model performs best and outperforms an AI Agent (hard-coded opponent, with a 5% error rate in its moves). 
+2D Simulation of a Ping-Pong Match! This repo contains 3 Models each containing weights for a Reinforcement Learning agent trained on a different nubmer of games (5000, 6000, and 7000 games). The 7000 game model performs best and outperforms an AI Agent (hard-coded opponent, with a 5% error rate in its moves). 
 
 
 https://github.com/SirHauler/ping-pong-prodigy/assets/62616045/2ae1504e-a1e0-499f-9572-05db026b68f0
