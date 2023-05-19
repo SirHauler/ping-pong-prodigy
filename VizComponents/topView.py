@@ -60,6 +60,10 @@ def _saveTopView(LOG_SUBDATA, save_prefix=None, picture_folder="pictures"):
                     c=c_ball,
                     s=100)
 
+    score = LOG_SUBDATA.get('Score')
+    rallyn = LOG_SUBDATA.get('Rally Number')
+    fig.suptitle(f"Score: {score}\nRally Number: {rallyn}")
+
     # Save image
     _ = plt.tight_layout()
     _ = plt.savefig(f"{picture_folder}/{save_prefix}_gameState.jpeg", bbox_inches="tight")
